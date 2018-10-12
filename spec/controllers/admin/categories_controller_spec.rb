@@ -10,11 +10,36 @@ describe Admin::CategoriesController do
     henri = Factory(:user, :login => 'henri', :profile => Factory(:profile_admin, :label => Profile::ADMIN))
     request.session = { :user => henri.id }
   end
+  
+  
 
   it "test_index" do
     get :index
     assert_response :redirect, :action => 'index'
   end
+
+  it "test_create" do
+    cat = Factory(:category)
+    Category.should_receive(:find).with(:all).and_return([])
+    Category.should_receive(:new).and_return(cat)
+    cat.should_receive(:save!).and_return(true)
+    post :edit, 'category' => { :name => "test_cat",:keywords=> "test_keywords",:permalink => "link", :description => "this is a description"}
+    assert_response :redirect
+    assert_redirected_to :action => 'new'
+  end
+  
+  describe "test_new" do
+    before(:each) do
+      get :new
+    end
+
+    it 'should render template new' do
+      assert_template 'new'
+      assert_tag :tag => "table",
+        :attributes => { :id => "category_container" }
+    end
+  end
+
 
   describe "test_edit" do
     before(:each) do
